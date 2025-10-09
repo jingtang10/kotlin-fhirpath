@@ -37,8 +37,8 @@ private val jsonR4 = Json {
 
 val testGroupsToSkip =
   listOf(
-    // Undefined
-    "testSort",
+    // Function `sort` is not defined in the specification
+    "testSort"
   )
 
 val testCasesToSkip =
@@ -66,35 +66,32 @@ class FhirPathEngineTest :
     val testSuite = XML.decodeFromString<Tests>(xmlContent)
 
     testSuite.groups
-      .filterNot {
-        testGroupsToSkip.contains(it.name)
-      }
+      .filterNot { testGroupsToSkip.contains(it.name) }
       .forEach { group ->
-      context(group.name) {
-        group.tests
-          .filterNot { testCasesToSkip.contains(it.name) }
-//          .filter { it.name == "testEquivalent7" }
-          .forEach { testCase ->
-            test(testCase.name) {
-              if (testCase.expression.invalid != null) {
-                assertFailsWith<Exception> {
-                  evaluateFhirPath(
-                    testCase.expression.value,
-                    testCase.inputfile?.let { inputMap[it] },
-                  )
+        context(group.name) {
+          group.tests
+            .filterNot { testCasesToSkip.contains(it.name) }
+            .forEach { testCase ->
+              test(testCase.name) {
+                if (testCase.expression.invalid != null) {
+                  assertFailsWith<Exception> {
+                    evaluateFhirPath(
+                      testCase.expression.value,
+                      testCase.inputfile?.let { inputMap[it] },
+                    )
+                  }
+                } else {
+                  val results =
+                    evaluateFhirPath(
+                      testCase.expression.value,
+                      testCase.inputfile?.let { inputMap[it] },
+                    )
+                  com.google.fhir.fhirpath.assertEquals(testCase.outputs, results)
                 }
-              } else {
-                val results =
-                  evaluateFhirPath(
-                    testCase.expression.value,
-                    testCase.inputfile?.let { inputMap[it] },
-                  )
-                com.google.fhir.fhirpath.assertEquals(testCase.outputs, results)
               }
             }
-          }
+        }
       }
-    }
   })
 
 private fun assertEquals(expected: List<Output>, actual: Collection<Any>) {
@@ -127,7 +124,7 @@ private fun assertEquals(expected: Output, actual: Any) {
       }
     }
     "integer" -> assertEquals(expected.value, (actual as Int).toString())
-    "decimal" -> assertEquals(expected.value, (actual as Double).toString())
+    "decimal" -> assertEquals(expected.value.toDouble(), actual as Double)
     "Quantity" ->
       assertEquals(
         expected.value,

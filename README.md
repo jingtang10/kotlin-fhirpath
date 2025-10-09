@@ -1,7 +1,7 @@
 # Kotlin FHIRPath
 
 [![stability-wip](https://img.shields.io/badge/stability-wip-lightgrey.svg)](https://guidelines.denpa.pro/stability#work-in-progress)
-![Static Badge](https://img.shields.io/badge/tests_passing-701%2F919-f4d03f)
+![Static Badge](https://img.shields.io/badge/tests_passing-702%2F919-f4d03f)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/overview.html)'s
@@ -93,12 +93,13 @@ FHIRPath but not allowed in FHIR).
 
 ## Conformance
 
-Due to the library's WIP status, not all test cases from the published official test suits are passing.
+Due to the library's WIP status, not all test cases from the published official test suites are
+passing. The failures are documented in the table below.
 
-| Test case                     | Failure reason | Tracking issue / PR | Note |
-|-------------------------------|----------------|---------------------|------|
-| `testComment6`                |                |                     |      |
-| `testCollectionNotEqualEmpty` |                |                     |      |
+|           Test case           | Failure reason  | Tracking issue / PR |                         Note                         |
+|-------------------------------|-----------------|---------------------|------------------------------------------------------|
+| `testCollectionNotEqualEmpty` |                 |                     |                                                      |
+| `testSort*`                   | Not implemented |                     | Function `sort` is not defined in the specification. |
 
 ## User Guide
 
@@ -159,20 +160,21 @@ The number of passing test cases is displayed on a badge at the top of this page
 
 The [third_party](third_party/) directory includes resources from the FHIRPath specification and related
 repositories for code generation and testing purposes:
+
 - [`fhir-test-cases`](third_party/fhir-test-cases/): content from the
-[fhir-test-cases](https://github.com/FHIR/fhir-test-cases) repo
-- [`tests-fhir-r4.xml`](third_party/fhir-test-cases/r4/tests-fhir-r4.xml): R4 test cases
-([commit](https://github.com/FHIR/fhir-test-cases/blob/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4/fhirpath/tests-fhir-r4.xml))
-- [`resources`](third_party/fhir-test-cases/r4/resources) JSON versions of the relevant test
-resources generated using [Anton V.](https://www.antvaset.com/)'s
-[FHIR Converter](https://www.antvaset.com/fhir-converter) alongside the XML versions
-([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4))
+  [fhir-test-cases](https://github.com/FHIR/fhir-test-cases) repo
+  - [`tests-fhir-r4.xml`](third_party/fhir-test-cases/r4/tests-fhir-r4.xml): R4 test cases
+    ([commit](https://github.com/FHIR/fhir-test-cases/blob/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4/fhirpath/tests-fhir-r4.xml))
+  - [`resources`](third_party/fhir-test-cases/r4/resources) JSON versions of the relevant test
+    resources generated using [Anton V.](https://www.antvaset.com/)'s
+    [FHIR Converter](https://www.antvaset.com/fhir-converter) alongside the XML versions
+    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4))
 - [`fhirpath-2.0.0`](third_party/fhirpath-2.0.0/): the formal
-[antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
-[N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
+  [antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
+  [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
 - [`hl7.fhir.r4.core`](third_party/hl7.fhir.r4.core/): content from
-[FHIR R4](https://hl7.org/fhir/R4/) for code generation
-- [UCUM](third_party/ucum/): content from the [UCUM](https://github.com/ucum-org/ucum) repo
+  [FHIR R4](https://hl7.org/fhir/R4/) for code generation
+- [`ucum`](third_party/ucum/): content from the [UCUM](https://github.com/ucum-org/ucum) repo
 
 ## Disclaimer
 
