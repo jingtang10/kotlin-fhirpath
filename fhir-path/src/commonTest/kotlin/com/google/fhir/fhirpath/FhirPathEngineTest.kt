@@ -81,9 +81,6 @@ val skippedTestCaseToReasonMap =
     "testQuantity4" to "https://github.com/FHIR/fhir-test-cases/pull/243",
     "testSubSetOf3" to
       "The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of \"\$this\" is unclear (https://jira.hl7.org/browse/FHIR-44601)",
-    "testQuantity9" to "Quantity multiplication is not implemented",
-    "testQuantity10" to "Quantity division is not implemented",
-    "testQuantity11" to "Quantity division is not implemented",
     "testDistinct2" to "descendants() is unimplemented",
     "testDistinct3" to "descendants() is unimplemented",
     "testDistinct5" to "descendants() is unimplemented",
