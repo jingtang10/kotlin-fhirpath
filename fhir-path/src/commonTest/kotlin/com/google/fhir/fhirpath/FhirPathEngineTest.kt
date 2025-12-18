@@ -102,7 +102,6 @@ val skippedTestCaseToReasonMap =
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
     "testMinus5" to
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
-    "testAbs3" to "TBD",
     "testPrecedence3" to "TBD",
     "testPrecedence4" to "TBD",
     "testPrecedence6" to "TBD",
