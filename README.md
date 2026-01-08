@@ -182,7 +182,6 @@ passing. The failures are documented in the table below.
 | `testTrace*`                         | Implementation     |     |                                                        | Function `trace` is not implemented.                                                                                                                                    |
 | `testNow1`                           | Specification/Test |     |                                                        | As `testDateTimeGreaterThanDate1`.                                                                                                                                      |
 | `testSort*`                          | Specification/Test |     |                                                        | Function `sort` is not defined in the specification.                                                                                                                    |
-| `testCombine*`                       | Implementation     |     |                                                        | Function `combine` is not implemented.                                                                                                                                  |
 | `testPlusDate13`                     | Specification/Test |     |                                                        | https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766                       |
 | `testPlusDate15`                     | Specification/Test |     |                                                        | As above.                                                                                                                                                               |
 | `testPlusDate18`                     | Implementation     |     |                                                        | To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.                                       |
@@ -207,6 +206,8 @@ passing. The failures are documented in the table below.
 | `testFHIRPathIsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
+| `testCombine2`                       | Implementation     |     |                                                        | FHIR String and Kotlin String comparison issue in `exclude()` function.                                                                                                 |
+| `testCombine3`                       | Implementation     |     |                                                        | As above.                                                                                                                                                               |
 
 The root cause column documents if the test failure is caused by issues with the implementation
 (this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
@@ -357,7 +358,7 @@ repositories for code generation and testing purposes:
   - [`resources`](third_party/fhir-test-cases/r4/resources) JSON versions of the relevant test
     resources generated using [Anton V.](https://www.antvaset.com/)'s
     [FHIR Converter](https://www.antvaset.com/fhir-converter) alongside the XML versions
-    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4))
+    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4)). The XML and JSON resource files in the fhir-test-cases repository are inconsistent; we use XML files converted to JSON.
 - [`fhirpath-2.0.0`](third_party/fhirpath-2.0.0/): the formal
   [antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
   [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
