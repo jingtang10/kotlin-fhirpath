@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,13 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
 @CacheableTask
-abstract class R4HelperGenerationTask : DefaultTask() {
+abstract class FhirModelHelperGenerationTask : DefaultTask() {
   @get:InputFiles
   @get:PathSensitive(PathSensitivity.NONE)
   // These are files retrieved from third_party/hl7.fhir.<R4|R4B|R5>.core directory
   abstract val corePackageFiles: ConfigurableFileCollection
 
-  @get:Input abstract val modelPackageName: Property<String>
-  @get:Input abstract val fhirPathPackageName: Property<String>
-
+  @get:Input abstract val fhirVersion: Property<String>
   @get:OutputDirectory abstract val outputDirectory: DirectoryProperty
 
   private val json = Json {
@@ -88,27 +86,29 @@ abstract class R4HelperGenerationTask : DefaultTask() {
         }
         .toList()
 
-    val modelPackageName = this.modelPackageName.get()
-    val fhirPathPackageName = this.fhirPathPackageName.get()
-    val fhirPathExtPackageName = "${fhirPathPackageName}.ext"
+    val fhirVersion = this.fhirVersion.get()
+    val modelPackageName = "com.google.fhir.model.$fhirVersion"
+    val modelExtPackageName = "com.google.fhir.model.$fhirVersion.ext"
+    val fhirPathPackageName = "com.google.fhir.fhirpath"
 
     // Generate resource extensions for accessing elements by name (e.g. `MorePatients.kt`)
 
     for (structureDefinition in structureDefinitions.filterNot { it.name == "Element" }) {
       ModelExtensionFileSpecGenerator.generate(
           modelPackageName = modelPackageName,
-          fhirPathExtPackageName = fhirPathExtPackageName,
+          modelExtensionPackageName = modelExtPackageName,
           structureDefinition = structureDefinition,
         )
         .writeTo(outputDir)
     }
 
-    // Generate "routers" for accessing elements by name (e.g. `MoreResources.kt`)
+    // Generate "routers" for accessing elements by name (e.g. `MoreResources.kt`). These helpers
+    // will be in `com.google.fhir.model.<FHIR_VERSION>.ext` package.
 
     ResourceExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
-        fhriPathPackageName = fhirPathPackageName,
-        fhirPathExtPackageName = fhirPathExtPackageName,
+        modelExtensionPackageName = modelExtPackageName,
+        fhirPathPackageName = fhirPathPackageName,
         structureDefinitions =
           structureDefinitions
             .filter { it.kind == Kind.RESOURCE }
@@ -119,14 +119,14 @@ abstract class R4HelperGenerationTask : DefaultTask() {
 
     BackboneElementExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
-        fhirPathExtPackageName = fhirPathExtPackageName,
+        modelExtPackageName = modelExtPackageName,
         structureDefinitions = structureDefinitions.filter { it.kind == Kind.RESOURCE },
       )
       .writeTo(outputDir)
 
     SealedInterfaceExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
-        fhirPathExtPackageName = fhirPathExtPackageName,
+        modelExtensionPackageName = modelExtPackageName,
         structureDefinitions =
           structureDefinitions
             .filter { it.kind == Kind.RESOURCE }
@@ -137,7 +137,7 @@ abstract class R4HelperGenerationTask : DefaultTask() {
 
     ComplexTypeExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
-        fhirPathExtPackageName = fhirPathExtPackageName,
+        modelExtensionPackageName = modelExtPackageName,
         structureDefinitions =
           structureDefinitions
             .filter { it.kind == Kind.COMPLEX_TYPE }
@@ -145,11 +145,14 @@ abstract class R4HelperGenerationTask : DefaultTask() {
       )
       .writeTo(outputDir)
 
-    // Generate primitive and complex type enums
+    // Generate primitive and complex type enums. These enum classes will be in
+    // `com.google.fhir.model.r4.ext package` since they need to subclass the sealed interface
+    // `FhirType`.
 
     PrimitiveTypeEnumFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
         fhirPathPackageName = fhirPathPackageName,
+        fhirVersion = fhirVersion,
         structureDefinitions = structureDefinitions.filter { it.kind == Kind.PRIMITIVE_TYPE },
       )
       .writeTo(outputDir)
@@ -157,6 +160,7 @@ abstract class R4HelperGenerationTask : DefaultTask() {
     ComplexTypeEnumFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
         fhirPathPackageName = fhirPathPackageName,
+        fhirVersion = fhirVersion,
         structureDefinitions =
           structureDefinitions.filter { it.kind == Kind.COMPLEX_TYPE && it.name != "Element" },
       )
