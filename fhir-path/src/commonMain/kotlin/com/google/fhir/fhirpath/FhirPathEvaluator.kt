@@ -57,8 +57,12 @@ import kotlin.time.Instant
  * @param initialContext The starting com.google.fhir.fhirpath.codegen.collection of FHIR resources
  *   for the expression.
  */
-internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Collection<Any>>() {
+internal class FhirPathEvaluator(
+  initialContext: Any?,
+  private val variables: Map<String, Any?> = emptyMap(),
+) : fhirpathBaseVisitor<Collection<Any>>() {
 
+  private val resource: Any? = initialContext
   private val contextStack = ArrayDeque<Collection<Any>>()
   private val thisStack = ArrayDeque<Any>()
   private val totalStack = ArrayDeque<Collection<Any>>()
@@ -300,6 +304,37 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     val unit = ctx.quantity().unit()?.text!!
     val pair = (number to unit)
     return listOf(FhirPathQuantity(value = pair.first, unit = pair.second))
+  }
+
+  // externalConstant
+
+  override fun visitExternalConstantTerm(
+    ctx: fhirpathParser.ExternalConstantTermContext
+  ): Collection<Any> {
+    val constantCtx = ctx.externalConstant()
+    val name =
+      constantCtx.identifier()?.let { visit(it).single() as String }
+        ?: constantCtx.STRING()?.text?.drop(1)?.dropLast(1)
+        ?: error("Invalid external constant")
+
+    return when {
+      name == "resource" -> resource?.let { listOf(it) } ?: emptyList()
+      name == "sct" -> listOf("http://snomed.info/sct")
+      name == "loinc" -> listOf("http://loinc.org")
+      name == "ucum" -> listOf("http://unitsofmeasure.org")
+      name.startsWith("vs-") -> {
+        val valueSetId = name.removePrefix("vs-")
+        listOf("http://hl7.org/fhir/ValueSet/$valueSetId")
+      }
+      name.startsWith("ext-") -> {
+        val extensionId = name.removePrefix("ext-")
+        listOf("http://hl7.org/fhir/StructureDefinition/$extensionId")
+      }
+      variables.containsKey(name) -> {
+        variables[name]?.let { listOf(it) } ?: emptyList()
+      }
+      else -> error("Unknown variable: %$name")
+    }
   }
 
   // invocation
