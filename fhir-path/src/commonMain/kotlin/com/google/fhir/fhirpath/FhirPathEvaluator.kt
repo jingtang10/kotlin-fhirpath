@@ -483,6 +483,35 @@ internal class FhirPathEvaluator(
         }
         total
       }
+      "repeat" -> {
+        // See [specification](https://hl7.org/fhirpath/N1/#repeatexpression-collection).
+        val expression = functionNode.paramList()!!.expression().single()
+        val queue = ArrayDeque(context)
+        val finalResults = mutableListOf<Any>()
+
+        while (queue.isNotEmpty()) {
+          val item = queue.removeFirst()
+
+          thisStack.addLast(item)
+          contextStack.addLast(listOf(item))
+          val results = visit(expression)
+          contextStack.removeLast()
+          thisStack.removeLast()
+
+          for (result in results) {
+            if (fhirModelNavigator.canHaveChildren(result)) {
+              finalResults.add(result)
+              queue.addLast(result)
+            } else {
+              if (finalResults.none { it.toFhirPathType(fhirPathTypeResolver) == result.toFhirPathType(fhirPathTypeResolver) }) {
+                finalResults.add(result)
+              }
+            }
+          }
+        }
+
+        finalResults
+      }
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
