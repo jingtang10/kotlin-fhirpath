@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition.Kind
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition.Kind
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
@@ -37,7 +37,7 @@ object ComplexTypeEnumFileSpecGenerator {
     return FileSpec.builder(className)
       .addType(
         TypeSpec.enumBuilder(className)
-          .addSuperinterface(ClassName(fhirPathPackageName, "FhirType"))
+          .addSuperinterface(ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}Type"))
           .primaryConstructor(
             FunSpec.constructorBuilder().addParameter("typeName", String::class).build()
           )
