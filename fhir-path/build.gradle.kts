@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "com.google.fhir"
-version = "1.0.0-alpha02"
+version = "1.0.0-beta01"
 
 val fhirVersions = mapOf(
     "r4" to "third_party/hl7.fhir.r4.core/package",

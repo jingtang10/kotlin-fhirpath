@@ -19,13 +19,13 @@ Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/
 
 ## Key features
 
-* Built with an [ANTLR](https://www.antlr.org/)-generated parser for strict adherence to the formal
-  FHIRPath grammar
-* Conforms strictly to the specification, with predictable and well-documented behavior
+* Strict conformation to the FHIRPath specification, with predictable and
+  [well-documented](#conformance) behavior
+* Built with an [ANTLR](https://www.antlr.org/)-generated parser for adherence to the formal grammar
 * Support for validation, conversion, and comparison between compatible
   [UCUM](http://unitsofmeasure.org/ucum.html) units
-* Designed for portability, providing a single engine across JVM, Android, iOS, Web (JS), and Native
-  platforms
+* Multiplatform support across Android, iOS, Desktop (JVM), Server-side (JVM), and Web (Wasm/JS)
+* Support for FHIR R4, R4B, R5, and future versions
 * Tested against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) to
   guarantee correctness
 
@@ -38,8 +38,7 @@ experimental nature of the sections marked as STU (Standard for Trial Use) in th
 
 ## FHIR version support
 
-The library currently supports R4 only. Support for other versions will be added as the library
-matures.
+The library supports FHIR R4, R4B and R5. Support will be added for future FHIR versions.
 
 ## Implementation
 
@@ -153,12 +152,18 @@ using intervals, it is not part of the FHIRPath specification. For simplicity, t
 
 ### Error handling
 
-The FHIRPath specification [does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws an exception) or a lenient (e.g. returns an empty collection) approach. However, the [official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require lenient type checking. To accommodate such cases, this implementation returns an empty collection when the FHIRPath expression attempts to access a data element that does not exist.
+The FHIRPath specification
+[does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired
+behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws
+an exception) or a lenient (e.g. returns an empty collection) approach. However, the
+[official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require
+lenient type checking. To accommodate such cases, this implementation returns an empty collection
+when the FHIRPath expression attempts to access a data element that does not exist.
 
 ## Conformance
 
-Due to the library's WIP status, not all test cases from the published official test suites are
-passing. The failures are documented in the table below.
+Test failures against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) are
+documented in the table below.
 
 |              Test case               |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                  Note                                                                                   |
 |--------------------------------------|--------------------|-----|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -204,10 +209,10 @@ passing. The failures are documented in the table below.
 | `testCombine2`                       | Implementation     |     |                                                        | FHIR String and Kotlin String comparison issue in `exclude()` function.                                                                                                 |
 | `testCombine3`                       | Implementation     |     |                                                        | As above.                                                                                                                                                               |
 
-The root cause column documents if the test failure is caused by issues with the implementation
-(this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
-or is under investigation. We exclude test cases that would fail due to issues in the tests and the
-specification itself. But we track the ongoing discussions and resolutions in this table.
+The root cause column documents if the test failure is caused by implementation issues in this
+repository, if the test cases themselves are problematic, or it is believed that the specification
+itself is ambiguous or inconsistent. For issues in the test cases and the specification, discussions
+and proposals should be linked in the table above.
 
 ## User Guide
 
