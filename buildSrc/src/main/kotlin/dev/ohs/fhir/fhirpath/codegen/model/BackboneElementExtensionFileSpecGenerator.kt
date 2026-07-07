@@ -35,75 +35,128 @@ object BackboneElementExtensionFileSpecGenerator {
     modelExtPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    return FileSpec.builder(modelExtPackageName, "MoreBackboneElements")
-      .addFunction(
-        FunSpec.builder("getProperty")
-          .addModifiers(KModifier.INTERNAL)
+    val typeClassNames = mutableListOf<ClassName>()
+    for (structureDefinition in structureDefinitions) {
+      val modelClassName =
+        ClassName(modelPackageName, structureDefinition.name.capitalized())
+      for (backboneElement in structureDefinition.backboneElements) {
+        typeClassNames.add(backboneElement.key.getNestedClassName(modelClassName))
+      }
+    }
+
+    // Split the massive type check expressions into chunks of 150.
+    // Kotlin JS compiles `when(this)` expressions with type checks (`is Type`) into nested JS `if/else` AST scopes.
+    // Having a single `when` expression with several hundred branches translates to several hundred levels of JS
+    // AST block nesting, which exceeds the JS engine's (e.g. Chrome/V8/Node) stack limits during execution/parsing,
+    // throwing "RangeError: Maximum call stack size exceeded". Chunking prevents this call-stack crash.
+    val chunks = typeClassNames.chunked(150)
+    val fileSpecBuilder = FileSpec.builder(modelExtPackageName, "MoreBackboneElements")
+      .addFileComment(
+        """
+        |Generated file. Do not edit.
+        |
+        |Helper functions are split into chunks of 150 branches to prevent deeply nested JS AST blocks
+        |and avoid 'RangeError: Maximum call stack size exceeded' in JavaScript runtimes.
+        """.trimMargin()
+      )
+
+    chunks.forEachIndexed { index, chunk ->
+      fileSpecBuilder.addFunction(
+        FunSpec.builder("getProperty$index")
+          .addModifiers(KModifier.PRIVATE)
           .receiver(ClassName(modelPackageName, "BackboneElement"))
           .returns(Any::class.asTypeName().copy(nullable = true))
           .addParameter(name = "name", type = String::class)
           .beginControlFlow("return when(this)")
           .apply {
-            for (structureDefinition in structureDefinitions) {
-              val modelClassName =
-                ClassName(modelPackageName, structureDefinition.name.capitalized())
-              for (backboneElement in structureDefinition.backboneElements) {
-                addStatement(
-                  "is %T -> getProperty(name)",
-                  backboneElement.key.getNestedClassName(modelClassName),
-                )
-              }
+            for (typeClassName in chunk) {
+              addStatement("is %T -> getProperty(name)", typeClassName)
             }
             addStatement("else -> null")
           }
           .endControlFlow()
           .build()
       )
-      .addFunction(
-        FunSpec.builder("hasProperty")
-          .addModifiers(KModifier.INTERNAL)
+    }
+    fileSpecBuilder.addFunction(
+      FunSpec.builder("getProperty")
+        .addModifiers(KModifier.INTERNAL)
+        .receiver(ClassName(modelPackageName, "BackboneElement"))
+        .returns(Any::class.asTypeName().copy(nullable = true))
+        .addParameter(name = "name", type = String::class)
+        .apply {
+          chunks.forEachIndexed { index, _ ->
+            addStatement("getProperty$index(name)?.let { return it }")
+          }
+          addStatement("return null")
+        }
+        .build()
+    )
+
+    chunks.forEachIndexed { index, chunk ->
+      fileSpecBuilder.addFunction(
+        FunSpec.builder("hasProperty$index")
+          .addModifiers(KModifier.PRIVATE)
           .receiver(ClassName(modelPackageName, "BackboneElement"))
           .returns(Boolean::class)
           .addParameter(name = "name", type = String::class)
           .beginControlFlow("return when(this)")
           .apply {
-            for (structureDefinition in structureDefinitions) {
-              val modelClassName =
-                ClassName(modelPackageName, structureDefinition.name.capitalized())
-              for (backboneElement in structureDefinition.backboneElements) {
-                addStatement(
-                  "is %T -> hasProperty(name)",
-                  backboneElement.key.getNestedClassName(modelClassName),
-                )
-              }
+            for (typeClassName in chunk) {
+              addStatement("is %T -> hasProperty(name)", typeClassName)
             }
             addStatement("else -> false")
           }
           .endControlFlow()
           .build()
       )
-      .addFunction(
-        FunSpec.builder("getAllChildren")
-          .addModifiers(KModifier.INTERNAL)
+    }
+    fileSpecBuilder.addFunction(
+      FunSpec.builder("hasProperty")
+        .addModifiers(KModifier.INTERNAL)
+        .receiver(ClassName(modelPackageName, "BackboneElement"))
+        .returns(Boolean::class)
+        .addParameter(name = "name", type = String::class)
+        .apply {
+          chunks.forEachIndexed { index, _ ->
+            addStatement("if (hasProperty$index(name)) return true")
+          }
+          addStatement("return false")
+        }
+        .build()
+    )
+
+    chunks.forEachIndexed { index, chunk ->
+      fileSpecBuilder.addFunction(
+        FunSpec.builder("getAllChildren$index")
+          .addModifiers(KModifier.PRIVATE)
           .receiver(ClassName(modelPackageName, "BackboneElement"))
           .returns(LIST.parameterizedBy(Any::class.asTypeName()))
           .beginControlFlow("return when(this)")
           .apply {
-            for (structureDefinition in structureDefinitions) {
-              val modelClassName =
-                ClassName(modelPackageName, structureDefinition.name.capitalized())
-              for (backboneElement in structureDefinition.backboneElements) {
-                addStatement(
-                  "is %T -> getAllChildren()",
-                  backboneElement.key.getNestedClassName(modelClassName),
-                )
-              }
+            for (typeClassName in chunk) {
+              addStatement("is %T -> getAllChildren()", typeClassName)
             }
             addStatement("else -> emptyList()")
           }
           .endControlFlow()
           .build()
       )
-      .build()
+    }
+    fileSpecBuilder.addFunction(
+      FunSpec.builder("getAllChildren")
+        .addModifiers(KModifier.INTERNAL)
+        .receiver(ClassName(modelPackageName, "BackboneElement"))
+        .returns(LIST.parameterizedBy(Any::class.asTypeName()))
+        .apply {
+          chunks.forEachIndexed { index, _ ->
+            addStatement("getAllChildren$index().let { if (it.isNotEmpty()) return it }")
+          }
+          addStatement("return emptyList()")
+        }
+        .build()
+    )
+
+    return fileSpecBuilder.build()
   }
 }

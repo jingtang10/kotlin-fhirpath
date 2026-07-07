@@ -16,20 +16,17 @@
 
 package dev.ohs.fhir.fhirpath
 
-import kotlin.test.assertEquals
-import org.junit.jupiter.api.Test
+import java.io.File
 
-private val fhirPathEngine = FhirPathEngine.forR4()
+actual fun loadFile(file: String): String {
+  return File("${System.getProperty("projectRootDir")}/${file}").readText()
+}
 
-class AggregateTest {
-
-  @Test
-  fun `nested aggregate inner total is independent from outer total`() {
-    val result =
-      fhirPathEngine.evaluateExpression(
-        "(1 | 2).aggregate((10 | 20 | 30).aggregate(\$total + \$this, 0) + \$total + \$this, 0)",
-        null,
-      )
-    assertEquals(listOf(123), result.toList())
-  }
+actual fun listJsonFiles(dir: String): Map<String, String> {
+  return File("${System.getProperty("projectRootDir")}/${dir}")
+    .listFiles()!!
+    .asSequence()
+    .filter { it.name.endsWith(".json") }
+    .map { it.name to it.readText() }
+    .toMap()
 }
