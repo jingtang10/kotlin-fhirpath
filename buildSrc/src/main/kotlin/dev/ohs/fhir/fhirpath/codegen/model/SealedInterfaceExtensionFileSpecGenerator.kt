@@ -63,7 +63,6 @@ object SealedInterfaceExtensionFileSpecGenerator {
         """.trimMargin()
       )
 
-    // 1. getPropertyInChoiceValue helpers & main
     chunks.forEachIndexed { index, chunk ->
       fileSpecBuilder.addFunction(
         FunSpec.builder("getPropertyInChoiceValue$index")
@@ -97,7 +96,6 @@ object SealedInterfaceExtensionFileSpecGenerator {
         .build()
     )
 
-    // 2. hasPropertyInChoiceValue helpers & main
     chunks.forEachIndexed { index, chunk ->
       fileSpecBuilder.addFunction(
         FunSpec.builder("hasPropertyInChoiceValue$index")
@@ -131,7 +129,6 @@ object SealedInterfaceExtensionFileSpecGenerator {
         .build()
     )
 
-    // 3. unwrapChoiceValue helpers & main
     chunks.forEachIndexed { index, chunk ->
       fileSpecBuilder.addFunction(
         FunSpec.builder("unwrapChoiceValue$index")

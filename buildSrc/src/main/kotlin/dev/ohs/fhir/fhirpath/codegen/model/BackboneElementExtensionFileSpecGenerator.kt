@@ -60,7 +60,6 @@ object BackboneElementExtensionFileSpecGenerator {
         """.trimMargin()
       )
 
-    // 1. getProperty helpers & main
     chunks.forEachIndexed { index, chunk ->
       fileSpecBuilder.addFunction(
         FunSpec.builder("getProperty$index")
@@ -94,7 +93,6 @@ object BackboneElementExtensionFileSpecGenerator {
         .build()
     )
 
-    // 2. hasProperty helpers & main
     chunks.forEachIndexed { index, chunk ->
       fileSpecBuilder.addFunction(
         FunSpec.builder("hasProperty$index")
@@ -128,7 +126,6 @@ object BackboneElementExtensionFileSpecGenerator {
         .build()
     )
 
-    // 3. getAllChildren helpers & main
     chunks.forEachIndexed { index, chunk ->
       fileSpecBuilder.addFunction(
         FunSpec.builder("getAllChildren$index")
