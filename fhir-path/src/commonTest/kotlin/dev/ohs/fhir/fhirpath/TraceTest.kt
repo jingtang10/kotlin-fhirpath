@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,46 @@ package dev.ohs.fhir.fhirpath
 
 import dev.ohs.fhir.model.r4.FhirR4Json
 import dev.ohs.fhir.model.r4.Resource
-import java.io.File
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 private val jsonR4 = FhirR4Json { ignoreUnknownKeys = true }
 
 private val engine = FhirPathEngine.forR4()
 
+private const val PATIENT_JSON =
+  """{
+  "resourceType": "Patient",
+  "id": "example",
+  "name": [
+    {
+      "use": "official",
+      "family": "Chalmers",
+      "given": [
+        "Peter",
+        "James"
+      ]
+    },
+    {
+      "use": "usual",
+      "given": [
+        "Jim"
+      ]
+    },
+    {
+      "use": "maiden",
+      "family": "Windsor",
+      "given": [
+        "Peter",
+        "James"
+      ]
+    }
+  ]
+}"""
+
 private fun loadPatient(): Resource {
-  val json =
-    File(
-        "${System.getProperty("projectRootDir")}/third_party/fhir-test-cases/r4/resources/patient-example.json"
-      )
-      .readText()
-  return jsonR4.decodeFromString(json)
+  return jsonR4.decodeFromString(PATIENT_JSON)
 }
 
 class TraceTest {

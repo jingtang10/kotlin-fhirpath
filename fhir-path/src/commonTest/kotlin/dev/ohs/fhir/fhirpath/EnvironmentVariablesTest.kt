@@ -16,9 +16,9 @@
 
 package dev.ohs.fhir.fhirpath
 
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import org.junit.jupiter.api.Test
 
 private val fhirPathEngine = FhirPathEngine.forR4()
 

@@ -1,5 +1,6 @@
 # Kotlin FHIRPath
 
+[![tests](https://github.com/ohs-foundation/kotlin-fhirpath/actions/workflows/run-tests.yml/badge.svg)](https://github.com/ohs-foundation/kotlin-fhirpath/actions/workflows/run-tests.yml)
 [![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path?color=yellow&label=fhir-path)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path)
 [![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-jvm?color=yellow&label=jvm)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-jvm)
 [![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-wasm-js?color=yellow&label=wasm-js)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-wasm-js)
@@ -43,22 +44,22 @@ The library supports FHIR R4, R4B and R5. Support will be added for future FHIR 
 The library supports the following
 [target platforms](https://kotlinlang.org/docs/multiplatform-dsl-reference.html#targets):
 
-| Target platform                    | Gradle target  | Artifact suffix  | Support |
-|:-----------------------------------|:---------------|:-----------------|:--------|
-| Kotlin/JVM                         | `jvm`          | `-jvm`           | ✅       |
-| Kotlin/Wasm                        | `wasmJs`       | `-wasm-js`       | ✅       |
-| Kotlin/Wasm                        | `wasmWasi`     | `-wasm-wasi`     | ✅       |
-| Kotlin/JS                          | `js`           | `-js`            | ✅       |
-| Android applications and libraries | `android`      | `-android`       | ✅       |
+| Target platform                    | Gradle target | Artifact suffix | Support |
+|:-----------------------------------|:--------------|:----------------|:--------|
+| Kotlin/JVM                         | `jvm`         | `-jvm`          | ✅       |
+| Kotlin/Wasm                        | `wasmJs`      | `-wasm-js`      | ✅       |
+| Kotlin/Wasm                        | `wasmWasi`    | `-wasm-wasi`    | ✅       |
+| Kotlin/JS                          | `js`          | `-js`           | ✅       |
+| Android applications and libraries | `android`     | `-android`      | ✅       |
 
 The library also supports the following
 [Kotlin/Native targets](https://kotlinlang.org/docs/native-target-support.html):
 
-| Gradle target      | Artifact suffix      | Tier | Support |
-|:-------------------|:---------------------|:-----|:--------|
-| iosSimulatorArm64  | `-iossimulatorarm64` | 1    | ✅       |
-| iosArm64           | `-iosarm64`          | 1    | ✅       |
-| iosX64             | `-iosx64`            | 3    | ✅       |
+| Gradle target     | Artifact suffix      | Tier | Support |
+|:------------------|:---------------------|:-----|:--------|
+| iosSimulatorArm64 | `-iossimulatorarm64` | 1    | ✅       |
+| iosArm64          | `-iosarm64`          | 1    | ✅       |
+| iosX64            | `-iosx64`            | 3    | ✅       |
 
 ## Implementation
 
@@ -342,14 +343,40 @@ since the `buildSrc` directory is precompiled separately in Gradle.
 
 ### Tests
 
-[XmlUtil](https://github.com/pdvrieze/xmlutil) is used to load the XML test cases from the
-`third_party` directory. To run the tests:
+This project distinguishes between two types of tests:
 
-```shell
-./gradlew :fhir-path:jvmTest
-```
+* **Spec-based tests**: Driven by
+  [FhirPathEngineTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/FhirPathEngineTest.kt),
+  these load the official [test cases](https://github.com/FHIR/fhir-test-cases) from
+  [third_party/fhir-test-cases/](third_party/fhir-test-cases/). As they require local file access,
+  they only run on **JVM** and **Android** targets. On other platform targets, file loading is
+  stubbed out.
+* **Unit tests**: Located in
+  [fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/),
+  these verify specific, platform-agnostic behaviors and run across all targets:
+  * [AggregateTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/AggregateTest.kt):
+    Tests nested aggregates.
+  * [EnvironmentVariablesTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/EnvironmentVariablesTest.kt):
+    Tests user-defined external variables.
+  * [TraceTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/TraceTest.kt): Verifies the
+    logging output of the `trace()` function.
 
-The number of passing test cases is displayed on a badge at the top of this page.
+#### Platform coverage and CI
+
+The [CI pipeline](.github/workflows/run-tests.yml) runs tests across six platform targets on every push and pull request. To run these tests locally, execute the corresponding Gradle task prefixed with `:fhir-path:` (e.g., `./gradlew :fhir-path:jvmTest`).
+
+| Platform              | Gradle task             | CI runner       | Spec-based tests | Unit tests |
+|:----------------------|:------------------------|:----------------|:----------------:|:----------:|
+| **JVM**               | `jvmTest`               | `ubuntu-latest` |        ✅         |     ✅      |
+| **Android**           | `testDebugUnitTest`     | `ubuntu-latest` |        ✅         |     ✅      |
+| **Wasm JS (Browser)** | `wasmJsBrowserTest`     | `ubuntu-latest` |        —         |     ✅      |
+| **Wasm WASI (Node)**  | `wasmWasiNodeTest`      | `ubuntu-latest` |        —         |     ✅      |
+| **JS (Browser)**      | `jsBrowserTest`         | `ubuntu-latest` |        —         |     ✅      |
+| **iOS (Simulator)**   | `iosSimulatorArm64Test` | `macos-latest`  |        —         |     ✅      |
+
+> [!NOTE]
+> Only the debug Android build variant is tested because debug and release produce identical Kotlin
+> library output.
 
 ### Publishing
 
