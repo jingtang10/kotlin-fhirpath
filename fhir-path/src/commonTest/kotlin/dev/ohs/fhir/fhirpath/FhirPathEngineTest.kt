@@ -20,13 +20,13 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
-import kotlinx.serialization.json.Json
 import dev.ohs.fhir.model.r4.Resource
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.test.Enabled
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 
 private const val TEST_RESOURCE_DIR = "third_party/fhir-test-cases/r4"
@@ -45,7 +45,6 @@ val skippedTestGroupToReasonMap =
   mapOf(
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
-    "testSort" to "Function `sort` is not defined in the specification",
     "testVariables" to "Unimplemented",
     "testExtension" to "Unimplemented",
     "testType" to "Unimplemented",
@@ -109,6 +108,8 @@ val skippedTestCaseToReasonMap =
     "testCombine3" to "As above",
     "testContainedId" to "TBD",
     "testPrimitiveExtensions" to "Function `hasValue` is not implemented.",
+    "testSort8" to "Test uses `-\$this` for descending string sort, but spec uses asc/desc.",
+    "testSort10" to "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
   )
 
 @OptIn(ExperimentalKotest::class)

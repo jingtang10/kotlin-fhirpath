@@ -72,6 +72,7 @@ internal class FhirPathEvaluator(
   private val variables = mutableMapOf<String, Any?>()
   var traces: Map<String, List<TraceEntry>> = emptyMap()
     private set
+
   @OptIn(ExperimentalTime::class) private var now: Instant = Clock.System.now()
 
   @OptIn(ExperimentalTime::class)
@@ -552,14 +553,54 @@ internal class FhirPathEvaluator(
           (ctx.getParent() as? fhirpathParser.InvocationExpressionContext)?.expression()?.text
         val resourceType = contextStack.first().singleOrNull()?.let { it::class.simpleName } ?: ""
         val basePath = if (parentExpr != null) "$resourceType.$parentExpr" else resourceType
-        val entries = readableValues.mapIndexed { i, value ->
-          TraceEntry(value = value, path = "$basePath[$i]")
-        }
+        val entries =
+          readableValues.mapIndexed { i, value ->
+            TraceEntry(value = value, path = "$basePath[$i]")
+          }
         traces = traces + (name to (traces[name].orEmpty() + entries))
 
         println("trace[$name]: ${entries.map { "${it.path}: ${it.value}" }}")
 
         context
+      }
+      "sort" -> {
+        // See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#sort).
+        if (context.size <= 1) return context.toList()
+
+        val keySelectors = functionNode.paramList()?.expression() ?: emptyList()
+
+        if (keySelectors.isEmpty()) {
+          // sort() with no arguments: sort by $this ascending
+          context.sortedWith { a, b ->
+            compare(
+              a.toFhirPathType(fhirPathTypeResolver),
+              b.toFhirPathType(fhirPathTypeResolver),
+              fhirPathTypeResolver,
+            ) ?: 0
+          }
+        } else {
+          // sort(key1, -key2, ...) with one or more key selectors, comparing by each key in turn
+          context.sortedWith { a, b ->
+            keySelectors.firstNotNullOfOrNull { selector ->
+              val aKey =
+                evaluateWithThis(a) {
+                  visit(selector).singleOrNull()?.toFhirPathType(fhirPathTypeResolver)
+                }
+              val bKey =
+                evaluateWithThis(b) {
+                  visit(selector).singleOrNull()?.toFhirPathType(fhirPathTypeResolver)
+                }
+              val result =
+                when {
+                  aKey == null && bKey == null -> 0
+                  aKey == null -> -1 // Empty always first per FHIRPath spec
+                  bKey == null -> 1 // Empty always first per FHIRPath spec
+                  else -> compare(aKey, bKey, fhirPathTypeResolver) ?: 0
+                }
+              result.takeIf { it != 0 }
+            } ?: 0
+          }
+        }
       }
       "is" -> {
         val type =
@@ -609,6 +650,12 @@ internal class FhirPathEvaluator(
   override fun visitIdentifier(ctx: fhirpathParser.IdentifierContext): Collection<Any> {
     val identifierText = ctx.text
     return listOf(identifierText.removeSurrounding("`"))
+  }
+
+  /** Evaluates a block with the given item pushed onto thisStack. */
+  private fun evaluateWithThis(item: Any, block: () -> Any?): Any? {
+    thisStack.addLast(item)
+    return block().also { thisStack.removeLast() }
   }
 }
 
