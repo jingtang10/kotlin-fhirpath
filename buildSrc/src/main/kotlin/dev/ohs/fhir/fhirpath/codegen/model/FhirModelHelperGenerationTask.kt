@@ -18,7 +18,6 @@ package dev.ohs.fhir.fhirpath.codegen.model
 
 import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition
 import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition.Kind
-import dev.ohs.fhir.fhirpath.codegen.model.schema.sortedByInheritanceDepthDescending
 import kotlinx.serialization.json.Json
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -137,14 +136,33 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
       )
       .writeTo(outputDir)
 
+    // Generate extension functions for complex types.
+    //
+    // Abstract base complex types are filtered out because:
+    // 1. An `is Base` branch inside `Element.getProperty(name)` recursively calls
+    // `Element.getProperty(name)`, causing a `StackOverflowError` (see
+    // https://github.com/ohs-foundation/kotlin-fhirpath/issues/75).
+    // 2. An `is DataType` branch would invoke `DataType.getProperty()`, which only handles `id` and
+    // `extension`, skipping the subtype's own properties.
+    //
+    // We keep `BackboneElement` because resource backbone elements (e.g. `Patient.Contact`)
+    // delegate to `MoreBackboneElements.kt` via `is BackboneElement -> getProperty(name)`.
+    //
+    // The only concrete subtype inheritance in FHIR involves `Age`, `Count`, `Distance`, and
+    // `Duration` inheriting from `Quantity`. These types share the same properties, therefore do
+    // not
+    // need to be treated differently in the context of these extension functions.
+
+    val abstractBaseComplexTypes =
+      setOf("Element", "Base", "DataType", "BackboneType", "PrimitiveType")
+
     ComplexTypeExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
         modelExtensionPackageName = modelExtPackageName,
         structureDefinitions =
           structureDefinitions
             .filter { it.kind == Kind.COMPLEX_TYPE }
-            .filterNot { it.name == "Element" }
-            .sortedByInheritanceDepthDescending(),
+            .filterNot { it.name in abstractBaseComplexTypes },
       )
       .writeTo(outputDir)
 
