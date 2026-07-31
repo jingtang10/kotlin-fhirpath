@@ -143,6 +143,11 @@ internal fun Collection<Any>.invoke(
     "highBoundary" -> this.highBoundary(params, fhirPathTypeResolver)
     "precision" -> this.precision(fhirPathTypeResolver)
 
+    // Reflection
+    // https://hl7.org/fhirpath/N1/#types-and-reflection
+    // https://build.fhir.org/ig/HL7/FHIRPath/en/#reflection
+    "type" -> this.type(fhirPathTypeResolver)
+
     // Defined as a boolean logic operator in the specification, but the grammar handles this as a
     // function invocation.
     "not" -> this.not()

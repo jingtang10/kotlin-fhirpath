@@ -16,6 +16,8 @@
 
 package dev.ohs.fhir.fhirpath.model
 
+import dev.ohs.fhir.fhirpath.types.TypeInfo
+
 /**
  * Set to true for strict mode (throws on invalid property access). Set to false for lenient mode
  * (returns empty for invalid properties).
@@ -24,6 +26,15 @@ internal const val STRICT_MODE = false
 
 abstract class FhirModelNavigator {
   fun accessProperty(obj: Any, propertyName: String): Any? {
+    // Ad-hoc handling for TypeInfo reflection properties (.namespace, .name, .baseType)
+    if (obj is TypeInfo) {
+      return when (propertyName) {
+        "namespace" -> obj.namespace
+        "name" -> obj.name
+        "baseType" -> obj.baseType
+        else -> null
+      }
+    }
     if (!STRICT_MODE) {
       // Allow graceful handling of invalid property access (returns null instead of throwing)
       if (!hasProperty(obj, propertyName)) return null

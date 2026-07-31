@@ -96,22 +96,8 @@ val skippedTestCaseToReasonMap =
     "testPrimitiveExtensions" to "Function `hasValue` is not implemented.",
     "testSort8" to "Test uses `-\$this` for descending string sort, but spec uses asc/desc.",
     "testSort10" to "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
-    "testType1" to "Function `type` is not implemented.",
-    "testType1a" to "As `testType1`.",
-    "testType2" to "As `testType1`.",
-    "testType2a" to "As `testType1`.",
-    "testType3" to "As `testType1`.",
-    "testType4" to "As `testType1`.",
-    "testType9" to "As `testType1`.",
-    "testType10" to "As `testType1`.",
-    "testType15" to "As `testType1`.",
-    "testType16" to "As `testType1`.",
-    "testType20" to
-      "Function `type` is not implemented; the `ofType` part of the expression works.",
-    "testType21" to "As `testType20`.",
     "testType22" to
       "`is` with an unknown `System` type should evaluate to false, but the type resolver throws `Unknown System type Patient`.",
-    "testType23" to "As `testType20`.",
     "testTypeA" to
       "Evaluating `Parameters.parameter[x].value` crashes with `NoSuchElementException: ArrayDeque is empty`.",
     "testTypeA1" to "As `testTypeA`.",
