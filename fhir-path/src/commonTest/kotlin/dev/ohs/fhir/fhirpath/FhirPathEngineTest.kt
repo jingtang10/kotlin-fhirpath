@@ -96,12 +96,8 @@ val skippedTestCaseToReasonMap =
     "testSort10" to "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
     "testType22" to
       "`is` with an unknown `System` type should evaluate to false, but the type resolver throws `Unknown System type Patient`.",
-    "testTypeA" to
-      "Evaluating `Parameters.parameter[x].value` crashes with `NoSuchElementException: ArrayDeque is empty`.",
-    "testTypeA1" to "As `testTypeA`.",
-    "testTypeA2" to "As `testTypeA`.",
-    "testTypeA3" to "As `testTypeA`.",
-    "testTypeA4" to "As `testTypeA`.",
+    "testTypeA3" to "`uuid` / `uri` subtype semantics. As `testFHIRPathIsFunction2`.",
+    "testTypeA4" to "As `testTypeA3`.",
     "HighBoundaryDateTimeMillisecond1" to
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/lowBoundary.20and.20highBoundary.20with.20incomplete.20date.20time/with/611113639",
     "HighBoundaryDateTimeMillisecond3" to
@@ -122,8 +118,11 @@ class FhirPathEngineTest :
   FunSpec({
     val inputMap: Map<String, Resource> =
       listJsonFiles(TEST_INPUT_DIR)
-        .mapKeys { it.key.replace(".json$".toRegex(), ".xml") }
-        .mapValues { jsonR4.decodeFromString(it.value) }
+        .flatMap { entry ->
+          val resource = jsonR4.decodeFromString<Resource>(entry.value)
+          listOf(entry.key to resource, entry.key.replace(".json$".toRegex(), ".xml") to resource)
+        }
+        .toMap()
     val xmlContent = loadFile("${TEST_RESOURCE_DIR}/tests-fhir-r4.xml")
     val testSuite = XML.decodeFromString<Tests>(xmlContent)
 
