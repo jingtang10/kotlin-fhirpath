@@ -140,6 +140,7 @@ internal fun Collection<Any>.invoke(
     "lowBoundary" -> this.lowBoundary(params, fhirPathTypeResolver)
     "highBoundary" -> this.highBoundary(params, fhirPathTypeResolver)
     "precision" -> this.precision(fhirPathTypeResolver)
+    "comparable" -> this.comparable(params, fhirPathTypeResolver)
 
     // Reflection
     // https://hl7.org/fhirpath/N1/#types-and-reflection
