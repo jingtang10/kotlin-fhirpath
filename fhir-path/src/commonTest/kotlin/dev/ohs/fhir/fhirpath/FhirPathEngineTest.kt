@@ -39,13 +39,6 @@ private val fhirPathEngine = FhirPathEngine.forR4()
 private val fhirPathEngineStrict = FhirPathEngine.forR4(strictMode = true)
 
 /**
- * A map from the test group name to the reason why the test group is skipped.
- *
- * N.B. This should be kept in sync with the conformance table in the `README.md` file.
- */
-val skippedTestGroupToReasonMap = mapOf("testConformsTo" to "Unimplemented")
-
-/**
  * A map from the test case name to the reason why the test case is skipped.
  *
  * N.B. This should be kept in sync with the conformance table in the `README.md` file.
@@ -58,6 +51,8 @@ val skippedTestCaseToReasonMap =
       "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
     "testDateTimeGreaterThanDate1" to
       "Comparison of two date time values, one with a timezone offset one without",
+    "testConformsTo3" to
+      "Intentional deviation: an unresolvable structure returns empty following R5 (https://hl7.org/fhir/R5/fhirpath.html#functions); R4 requires an error",
     "testSubSetOf3" to
       "The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of \"\$this\" is unclear (https://jira.hl7.org/browse/FHIR-44601)",
     "testQuantity4" to "https://github.com/FHIR/fhir-test-cases/pull/243",
@@ -96,11 +91,7 @@ class FhirPathEngineTest :
     val testSuite = XML.decodeFromString<Tests>(xmlContent)
 
     testSuite.groups.forEach { group ->
-      context(group.name).config(
-        enabledOrReasonIf = {
-          skippedTestGroupToReasonMap[group.name]?.let { Enabled.disabled(it) } ?: Enabled.enabled
-        }
-      ) {
+      context(group.name).config {
         group.tests.forEach { testCase ->
           test(testCase.name).config(
             enabledOrReasonIf = {
