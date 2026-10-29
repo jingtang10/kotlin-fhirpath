@@ -66,7 +66,7 @@ class ConformanceR4BTest :
         testCasesXmlFilePath = "${TEST_RESOURCE_DIR}/tests-fhir-r4b.xml",
         resourcesDir = "${TEST_RESOURCE_DIR}/resources",
         lenientEngine = FhirPathEngine.forR4B(),
-        strictEngine = FhirPathEngine.forR4B(strictMode = true),
+        strictEngine = FhirPathEngine.forR4B { strictMode = true },
         resourceDecoder = { jsonR4B.decodeFromString<dev.ohs.fhir.model.r4b.Resource>(it) },
         fhirStringValueExtractor = { (it as? dev.ohs.fhir.model.r4b.String)?.value },
         fhirQuantityStringExtractor = {

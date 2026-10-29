@@ -296,6 +296,14 @@ run-time property access modes:
   property.
 * **Strict mode:** Throws an `IllegalStateException` when accessing an undefined property.
 
+### Parsed expression caching
+
+By default, `FhirPathEngine` caches up to 1,000 parsed FHIRPath expression trees in memory so that
+repeatedly evaluated expressions (such as search parameter indexing or questionnaire expressions) do
+not re-run the ANTLR lexer and parser on every invocation. On memory-constrained platforms or
+workloads with one-off expressions, caching can be disabled by passing
+`cacheParsedExpressions = false`.
+
 ## User Guide
 
 ### Adding the library dependency to your project
@@ -366,7 +374,10 @@ Create a `FhirPathEngine` for the FHIR version you are working with (R4, R4B, or
 val fhirPathEngine = FhirPathEngine.forR4()
 
 // Create an engine with strict mode enabled (throws on invalid property access)
-val fhirPathEngineStrict = FhirPathEngine.forR4(strictMode = true)
+val fhirPathEngineStrict = FhirPathEngine.forR4 { strictMode = true }
+
+// Create an engine with parsed expression caching disabled
+val fhirPathEngineUncached = FhirPathEngine.forR4 { cacheParsedExpressions = false }
 ```
 
 ### Evaluating FHIRPath expressions
@@ -387,7 +398,7 @@ val results = fhirPathEngine.evaluateExpression("name.given", patient)
 // ["Peter", "James", "Jim", "Peter", "James"]
 
 // In strict mode, accessing an unrecognized property throws an IllegalStateException
-val fhirPathEngineStrict = FhirPathEngine.forR4(strictMode = true)
+val fhirPathEngineStrict = FhirPathEngine.forR4 { strictMode = true }
 strictEngine.evaluateExpression("name.given1", patient) // Throws IllegalStateException
 ```
 
@@ -436,6 +447,8 @@ This project distinguishes between two types of tests:
     Tests nested aggregates.
   * [EnvironmentVariablesTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/EnvironmentVariablesTest.kt):
     Tests user-defined external variables.
+  * [ParsedExpressionCacheTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/ParsedExpressionCacheTest.kt):
+    Tests caching of parsed FHIRPath expressions.
   * [TraceTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/TraceTest.kt): Verifies the
     logging output of the `trace()` function.
 

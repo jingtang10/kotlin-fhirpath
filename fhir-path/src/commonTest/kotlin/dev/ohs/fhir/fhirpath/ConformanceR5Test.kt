@@ -101,7 +101,7 @@ class ConformanceR5Test :
         testCasesXmlFilePath = "${TEST_RESOURCE_DIR}/tests-fhir-r5.xml",
         resourcesDir = "${TEST_RESOURCE_DIR}/resources",
         lenientEngine = FhirPathEngine.forR5(),
-        strictEngine = FhirPathEngine.forR5(strictMode = true),
+        strictEngine = FhirPathEngine.forR5 { strictMode = true },
         resourceDecoder = { jsonR5.decodeFromString<dev.ohs.fhir.model.r5.Resource>(it) },
         fhirStringValueExtractor = { (it as? dev.ohs.fhir.model.r5.String)?.value },
         fhirQuantityStringExtractor = {

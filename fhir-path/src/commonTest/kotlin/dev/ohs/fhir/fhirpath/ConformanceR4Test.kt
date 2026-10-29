@@ -69,7 +69,7 @@ class ConformanceR4Test :
         testCasesXmlFilePath = "${TEST_RESOURCE_DIR}/tests-fhir-r4.xml",
         resourcesDir = "${TEST_RESOURCE_DIR}/resources",
         lenientEngine = FhirPathEngine.forR4(),
-        strictEngine = FhirPathEngine.forR4(strictMode = true),
+        strictEngine = FhirPathEngine.forR4 { strictMode = true },
         resourceDecoder = { jsonR4.decodeFromString<dev.ohs.fhir.model.r4.Resource>(it) },
         fhirStringValueExtractor = { (it as? dev.ohs.fhir.model.r4.String)?.value },
         fhirQuantityStringExtractor = {
